@@ -1,0 +1,20 @@
+os: linux
+dist: xenial
+
+language: c
+
+cache: ccache
+
+compiler:
+  - gcc
+
+env:
+  global:
+      - MAKEFLAGS="-j 2"
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y -qq gcc cmake git ccache build-essential
+
+script:
+- make
