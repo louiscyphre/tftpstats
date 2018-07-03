@@ -44,23 +44,23 @@ typedef enum {
 } tftpstats_result_t;
 
 int main(int argc, char *argv[]) {
-    uid_t ruid, euid, suid; /* Real, Effective, Saved user ID */
-    gid_t rgid, egid, sgid; /* Real, Effective, Saved group ID */
-    int uerr, gerr;
+    uid_t real_uid, effective_uid, saved_uid;/* Real, Effective, Saved user * ID */
+    gid_t real_gid, effective_gid, saved_gid; /* Real, Effective, Saved group * ID */
+    int uid_error, gid_error;
 
-    if (getresuid(&ruid, &euid, &suid) == -1) {
+    if (getresuid(&real_uid, &effective_uid, &saved_uid) == -1) {
         fprintf(stderr, "Cannot obtain user identity: %s.\n", strerror(errno));
         return TFTPSTATS_FAILURE;
     }
-    if (getresgid(&rgid, &egid, &sgid) == -1) {
+    if (getresgid(&real_gid, &effective_gid, &saved_gid) == -1) {
         fprintf(stderr, "Cannot obtain group identity: %s.\n", strerror(errno));
         return TFTPSTATS_FAILURE;
     }
-    if (ruid != (uid_t) TARGET_UID && ruid < (uid_t) MIN_UID) {
+    if (real_uid != (uid_t) TARGET_UID && real_uid < (uid_t) MIN_UID) {
         fprintf(stderr, "Invalid user.\n");
         return TFTPSTATS_FAILURE;
     }
-    if (rgid != (gid_t) TARGET_UID && rgid < (gid_t) MIN_GID) {
+    if (real_gid != (gid_t) TARGET_UID && real_gid < (gid_t) MIN_GID) {
         fprintf(stderr, "Invalid group.\n");
         return TFTPSTATS_FAILURE;
     }
@@ -78,40 +78,39 @@ int main(int argc, char *argv[]) {
         return TFTPSTATS_FAILURE;
     }
 
+    pid_t pid;
+    if (pid = fork() < 0) {
+        fprintf(stderr, "[ERROR] fork(): .\n", strerror(errno));
+        return TFTPSTATS_FAILURE;
+    } else if (pid == 0) {
+        /* Drop privileges for child process. */
+        gid_error = 0;
+        if (setresgid(real_gid, real_gid, real_gid) == -1) {
+            gid_error = errno;
+            if (!gid_error)
+                gid_error = EINVAL;
+        }
+        uid_error = 0;
+        if (setresuid(real_uid, real_uid, real_uid) == -1) {
+            uid_error = errno;
+            if (!uid_error)
+                uid_error = EINVAL;
+        }
+        if (uid_error || gid_error) {
+            if (uid_error)
+                fprintf(stderr, "Cannot drop user privileges: %s.\n",
+                        strerror(uid_error));
+            if (gid_error)
+                fprintf(stderr, "Cannot drop group privileges: %s.\n",
+                        strerror(gid_error));
+            return TFTPSTATS_FAILURE;
+        }
+        
+    }
     /* ... privileged operations ... */
 
-    /* Open the restricted file.
-     * If 'filename' is specified by the calling user,
-     * in command-line parameters or environment variables,
-     * you may have handed them a way to read e.g. /etc/gpasswd.
-     * Don't do that.
-     * If you have to do that, a lot of additional checks are needed,
-     * some before opening the file, and others after opening the file.
-     * Even then it is risky (hard link races and such).
-    */
 
-    /* Drop privileges. */
-    gerr = 0;
-    if (setresgid(rgid, rgid, rgid) == -1) {
-        gerr = errno;
-        if (!gerr)
-            gerr = EINVAL;
-    }
-    uerr = 0;
-    if (setresuid(ruid, ruid, ruid) == -1) {
-        uerr = errno;
-        if (!uerr)
-            uerr = EINVAL;
-    }
-    if (uerr || gerr) {
-        if (uerr)
-            fprintf(stderr, "Cannot drop user privileges: %s.\n",
-                    strerror(uerr));
-        if (gerr)
-            fprintf(stderr, "Cannot drop group privileges: %s.\n",
-                    strerror(gerr));
-        return TFTPSTATS_FAILURE;
-    }
+
 
     /* ... unprivileged operations ... */
 
