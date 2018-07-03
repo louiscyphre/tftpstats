@@ -54,7 +54,7 @@ set(CMAKE_C_COMPILER "gcc")
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${TARGET_INCLUDE_DIR})
 
-add_library(${TFTPS_PROGRAM} STATIC ${PROJECT_H_FILES} ${PROJECT_C_FILES})
+add_executable(${TFTPS_PROGRAM} ${PROJECT_C_FILES})
 
 target_compile_options(ttftps PUBLIC -Wall -Wextra -pedantic)
 
