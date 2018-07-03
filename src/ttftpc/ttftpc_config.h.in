@@ -1,0 +1,54 @@
+#ifndef __TTFTPC_CONFIG_H
+#define __TTFTPC_CONFIG_H
+
+#define TTFTPC_VERSION_MAJOR @TTFTPC_VERSION_MAJOR@
+#define TTFTPC_VERSION_MINOR @TTFTPC_VERSION_MINOR@
+#define TTFTPC_VERSION_PATCH @TTFTPC_VERSION_PATCH@
+#define TTFTPC_VERSION @TTFTPC_VERSION@
+
+// Switches ////////////////////////////////////////////////////////////////////
+
+//#define FAST_TRANSMISSION   // if defined block size is changed to 1024,
+// PACKET_TIMEOUT is seto to 1,
+// MAX_TIMEOUTS is set to 20
+
+// Constants ///////////////////////////////////////////////////////////////////
+
+#define FILE_NAME_MAX_LEN   255         // arbitrary limitations that sum up to
+#define MODE_NAME_MAX_LEN   255         // 510 bytes without any special reason
+// (512 bytes with \0 terminators)
+#ifdef FAST_TRANSMISSION
+    #define MAX_DATA_SIZE   1024        // TFTP protocol requires 512 bytes
+#else
+    #define MAX_DATA_SIZE   512         // TFTP protocol requires 512 bytes
+#endif
+
+#define MAX_BLOCK_NUMBER    UINT16_MAX  // 65535
+#define DAT_HEADER_SIZE     4           // two uint16_t variables: opcode,number
+#define ACK_PACKET_SIZE     4           // two uint16_t variables: opcode,number
+#define MIN_PACKET_SIZE     4           // at least opcode + 2 additional bytes
+
+#define OPCODE_RRQ          1
+#define OPCODE_WRQ          2
+#define OPCODE_DAT          3
+#define OPCODE_ACK          4
+#define OPCODE_ERR          5
+
+// Definitions /////////////////////////////////////////////////////////////////
+
+#ifdef FAST_TRANSMISSION        // defined in ttftp_types.h
+#define PACKET_TIMEOUT          1       // default 3
+#define MAX_TIMEOUTS            20      // default 7
+#else
+#define PACKET_TIMEOUT          3
+#define MAX_TIMEOUTS            7
+#endif
+
+#define MAX_CLIENT_FAILURES     5
+#define MAX_INVALID_PACKETS     10
+
+
+//#define _GNU_SOURCE
+// needed for C99 standard compliance
+
+#endif /* __TTFTPC_CONFIG_H */
