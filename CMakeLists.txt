@@ -8,8 +8,8 @@ set(CMAKE_C_STANDARD 11)
 
 
 set(CMAKE_COLOR_MAKEFILE   ON)
-set(CMAKE_FILES_DIRECTORY ${CMAKE_SOURCE_DIR}/cmake)
 set(PROJ_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(CMAKE_FILES_DIRECTORY ${PROJ_SOURCE_DIR}/cmake)
 set(PROJ_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 
 option(ENABLE_CCACHE "Use ccache" ON)
@@ -71,13 +71,19 @@ ExternalProject_Add(${TFTPS_PROGRAM}
 
 set(CMAKE_C_COMPILER "gcc")
 
-set(PROJECT_C_FILES src/main.c src/main.c)
+configure_file(
+        "${PROJ_SOURCE_DIR}/src/${TFTPSTATS_PROGRAM}_config.h.in"
+        "${PROJ_BINARY_DIR}/${TFTPSTATS_PROGRAM}_config.h")
+
+include_directories(${PROJ_BINARY_DIR})
+
+set(PROJECT_C_FILES src/main.c)
 
 add_executable(${TFTPSTATS_PROGRAM} ${PROJECT_C_FILES})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPC_PROGRAM})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPS_PROGRAM})
 
-set(TFTPC_PATH ${CMAKE_INSTALL_PREFIX}/bin/${TFTPC_PROGRAM})
+set(TFTPC_PATH ${PROJ_BINARY_DIR}/${TFTPC_PROGRAM})
 
 target_compile_options(${TFTPSTATS_PROGRAM} PUBLIC -Wall -Wextra -pedantic)
 target_link_libraries(${TFTPSTATS_PROGRAM}

@@ -3,31 +3,12 @@
 // Created by: louiscyphre@github
 // Created on: 20:12 03.07.2018
 //
-
-#ifndef _GNU_SOURCE
-    #define _GNU_SOURCE
-#endif
+#include "tftpstats_config.h"
 
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-
-#ifndef TARGET_UID
-    #define TARGET_UID 0
-#endif
-
-#ifndef TARGET_GID
-    #define TARGET_GID 0
-#endif
-
-#ifndef MIN_UID
-    #define MIN_UID 500
-#endif
-
-#ifndef MIN_GID
-    #define MIN_GID 500
-#endif
 
 // Types ///////////////////////////////////////////////////////////////////////
 
@@ -43,7 +24,7 @@ typedef enum {
     TFTPSTATS_OUT_OF_MEMORY
 } tftpstats_result_t;
 
-int main(int argc, char *argv[]) {
+int main() {
     uid_t real_uid, effective_uid, saved_uid;/* Real, Effective, Saved user * ID */
     gid_t real_gid, effective_gid, saved_gid; /* Real, Effective, Saved group * ID */
     int uid_error, gid_error;
@@ -79,8 +60,8 @@ int main(int argc, char *argv[]) {
     }
 
     pid_t pid;
-    if (pid = fork() < 0) {
-        fprintf(stderr, "[ERROR] fork(): .\n", strerror(errno));
+    if ((pid = fork()) < 0) {
+        fprintf(stderr, "[ERROR] fork(): %s\n", strerror(errno));
         return TFTPSTATS_FAILURE;
     } else if (pid == 0) {
         /* Drop privileges for child process. */
@@ -105,7 +86,7 @@ int main(int argc, char *argv[]) {
                         strerror(gid_error));
             return TFTPSTATS_FAILURE;
         }
-        
+
     }
     /* ... privileged operations ... */
 

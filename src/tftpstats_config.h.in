@@ -1,0 +1,30 @@
+#ifndef __TFTPS_CONFIG_H
+#define __TFTPS_CONFIG_H
+
+#define TFTPS_VERSION_MAJOR @TFTPS_VERSION_MAJOR@
+#define TFTPS_VERSION_MINOR @TFTPS_VERSION_MINOR@
+#define TFTPS_VERSION_PATCH @TFTPS_VERSION_PATCH@
+#define TFTPS_VERSION @TFTPS_VERSION@
+
+#ifndef _GNU_SOURCE
+    #define _GNU_SOURCE
+#endif
+
+// Constants ///////////////////////////////////////////////////////////////////
+#ifndef TARGET_UID
+    #define TARGET_UID 0
+#endif
+
+#ifndef TARGET_GID
+    #define TARGET_GID 0
+#endif
+
+#ifndef MIN_UID
+    #define MIN_UID 500
+#endif
+
+#ifndef MIN_GID
+    #define MIN_GID 500
+#endif
+
+#endif /* __TFTPS_CONFIG_H */

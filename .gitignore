@@ -68,6 +68,6 @@ cmake_install.cmake
 tftpstats
 tftpstats.cbp
 tmp/
-ttftpc-prefix/
-ttftps-prefix/
+tftpc-prefix/
+tftps-prefix/
 
