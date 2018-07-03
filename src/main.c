@@ -46,14 +46,14 @@ typedef enum {
 int main(int argc, char *argv[]) {
     uid_t ruid, euid, suid; /* Real, Effective, Saved user ID */
     gid_t rgid, egid, sgid; /* Real, Effective, Saved group ID */
-    int uerr, gerr, fd;
+    int uerr, gerr;
 
     if (getresuid(&ruid, &euid, &suid) == -1) {
-        fprintf(stderr, "Cannot obtain user identity: %m.\n");
+        fprintf(stderr, "Cannot obtain user identity: %s.\n", strerror(errno));
         return TFTPSTATS_FAILURE;
     }
     if (getresgid(&rgid, &egid, &sgid) == -1) {
-        fprintf(stderr, "Cannot obtain group identity: %m.\n");
+        fprintf(stderr, "Cannot obtain group identity: %s.\n", strerror(errno));
         return TFTPSTATS_FAILURE;
     }
     if (ruid != (uid_t) TARGET_UID && ruid < (uid_t) MIN_UID) {
@@ -114,6 +114,6 @@ int main(int argc, char *argv[]) {
     }
 
     /* ... unprivileged operations ... */
-    
+
     return 0;
 }
