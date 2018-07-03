@@ -1,15 +1,15 @@
 //
-//      TTFTP functions library, interface
+//      TFTP functions library, interface
 //      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftp_lib.h
-//      project:    ttftp library
+//      filename:   tftp_lib.h
+//      project:    tftp library
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
 //
-#ifndef __TTFTP_LIB_H
-#define __TTFTP_LIB_H
+#ifndef __TFTP_LIB_H
+#define __TFTP_LIB_H
 
 // Switches ////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@
 
 #define CHECK_PRINT_EXIT(result, message)           \
 {                                                   \
-    if((result) != TTFTP_SUCCESS)                   \
+    if((result) != TFTP_SUCCESS)                   \
     {                                               \
         fprintf(stderr, message);                   \
         fflush(stderr);                             \
@@ -100,4 +100,4 @@ unsigned int get_port(struct addrinfo *addr_ptr);
 unsigned long usec_stopper(void);
 
 
-#endif // __TTFTP_LIB_H
+#endif // __TFTP_LIB_H

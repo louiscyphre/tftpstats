@@ -31,7 +31,7 @@ endif()
 
 include(ExternalProject)
 
-set(TFTPC_PROGRAM ttftpc)
+set(TFTPC_PROGRAM tftpc)
 
 ExternalProject_Add(${TFTPC_PROGRAM}
     SOURCE_DIR   ${PROJ_SOURCE_DIR}/src/${TFTPC_PROGRAM}
@@ -50,7 +50,7 @@ ExternalProject_Add(${TFTPC_PROGRAM}
     LOG_TEST 0
 )
 
-set(TFTPS_PROGRAM ttftps)
+set(TFTPS_PROGRAM tftps)
 
 ExternalProject_Add(${TFTPS_PROGRAM}
     SOURCE_DIR   ${PROJ_SOURCE_DIR}/src/${TFTPS_PROGRAM}
@@ -71,7 +71,7 @@ ExternalProject_Add(${TFTPS_PROGRAM}
 
 set(CMAKE_C_COMPILER "gcc")
 
-set(PROJECT_C_FILES src/main.c)
+set(PROJECT_C_FILES src/main.c src/main.c)
 
 add_executable(${TFTPSTATS_PROGRAM} ${PROJECT_C_FILES})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPC_PROGRAM})

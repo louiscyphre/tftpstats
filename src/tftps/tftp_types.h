@@ -1,15 +1,15 @@
 //
-//      TTFTP types definitions
+//      TFTP types definitions
 //      ~~~~~~~~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftp_types.c
-//      project:    ttftp library
+//      filename:   tftp_types.h
+//      project:    tftp library
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
 //
-#ifndef __TTFTP_TYPES_H
-#define __TTFTP_TYPES_H
+#ifndef __TFTP_TYPES_H
+#define __TFTP_TYPES_H
 
 // Included Headers ////////////////////////////////////////////////////////////
 
@@ -19,16 +19,16 @@
 // Types ///////////////////////////////////////////////////////////////////////
 
 typedef enum {
-    TTFTP_FAILURE = -1, TTFTP_SUCCESS, TTFTP_INVALID_PARAMETER,
-    TTFTP_ERROR_GETADDRINFO, TTFTP_COULD_NOT_CONNECT,
-    TTFTP_ERROR_SENDTO, TTFTP_UNEXPECTED_PACKET,
-    TTFTP_ERROR_RECVFROM, TTFTP_PACKET_SENT_PARTIALLY,
-    TTFTP_ERROR_SELECT, TTFTP_TIMEOUT,
-    TTFTP_ERROR_OPEN, TTFTP_MAX_TIMEOUTS_REACHED,
-    TTFTP_MAX_INVALID_PACKETS_REACHED,
-    TTFTP_FILE_NAME_TOO_LONG, TTFTP_MODE_NAME_TOO_LONG,
-    TTFTP_OUT_OF_MEMORY
-} ttftp_result_t;
+    TFTP_FAILURE = -1, TFTP_SUCCESS, TFTP_INVALID_PARAMETER,
+    TFTP_ERROR_GETADDRINFO, TFTP_COULD_NOT_CONNECT,
+    TFTP_ERROR_SENDTO, TFTP_UNEXPECTED_PACKET,
+    TFTP_ERROR_RECVFROM, TFTP_PACKET_SENT_PARTIALLY,
+    TFTP_ERROR_SELECT, TFTP_TIMEOUT,
+    TFTP_ERROR_OPEN, TFTP_MAX_TIMEOUTS_REACHED,
+    TFTP_MAX_INVALID_PACKETS_REACHED,
+    TFTP_FILE_NAME_TOO_LONG, TFTP_MODE_NAME_TOO_LONG,
+    TFTP_OUT_OF_MEMORY
+} tftp_result_t;
 
 struct rrq_packet {
     uint16_t opcode;    // stored in the network endianness
@@ -69,4 +69,4 @@ struct dat_packet {
 
 typedef struct dat_packet dat_packet_t;
 
-#endif // __TTFTP_TYPES_H
+#endif // __TFTP_TYPES_H

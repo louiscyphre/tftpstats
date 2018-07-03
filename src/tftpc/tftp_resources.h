@@ -1,15 +1,15 @@
 //
-//      TTFTP resources data type, interface
+//      TFTP resources data type, interface
 //      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftp_resources.h
-//      project:    ttftp library
+//      filename:   tftp_resources.h
+//      project:    tftp library
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
 //
-#ifndef __TTFTP_RESOURCES_H
-#define __TTFTP_RESOURCES_H
+#ifndef __TFTP_RESOURCES_H
+#define __TFTP_RESOURCES_H
 
 // Included Headers ////////////////////////////////////////////////////////////
 
@@ -40,4 +40,4 @@ int allocate_resources(resources_t *resources_ptr);
 void free_resources(resources_t *resources_ptr);
 
 
-#endif // __TTFTP_RESOURCES_H
+#endif // __TFTP_RESOURCES_H

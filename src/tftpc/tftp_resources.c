@@ -1,9 +1,9 @@
 //
-//      TTFTP resources data type, implementation
+//      TFTP resources data type, implementation
 //      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftp_resources.c
-//      project:    ttftp library
+//      filename:   tftp_resources.c
+//      project:    tftp library
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
@@ -11,7 +11,7 @@
 
 // Included Headers ////////////////////////////////////////////////////////////
 
-#include "ttftpc_config.h"
+#include "tftpc_config.h"
 
 #include <stdlib.h>
 // using malloc(), free()
@@ -23,11 +23,11 @@
 // using errno, EBADF
 
 
-#include "ttftp_types.h"
-// using TTFTP error codes
-#include "ttftp_lib.h"
+#include "tftp_types.h"
+// using TFTP error codes
+#include "tftp_lib.h"
 // using free_address()
-#include "ttftp_resources.h"
+#include "tftp_resources.h"
 
 
 // Declarations ////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ static int initialize_resources(resources_t *resources_ptr);
 
 static int initialize_resources(resources_t *resources_ptr) {
     if (resources_ptr == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     // zero all the pointer fields, all the other fields get zeroed for company
@@ -55,13 +55,13 @@ static int initialize_resources(resources_t *resources_ptr) {
 
     // all the other fields of resources_t structure are supposed to be
     // initialized further in the code, at this moment they are just zeroed
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
 int allocate_resources(resources_t *resources_ptr) {
     if (resources_ptr == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     initialize_resources(resources_ptr);
@@ -71,10 +71,10 @@ int allocate_resources(resources_t *resources_ptr) {
     resources_ptr->buffer_size = 2 * (DAT_HEADER_SIZE + MAX_DATA_SIZE);
     resources_ptr->buffer = malloc(resources_ptr->buffer_size);
     if (resources_ptr->buffer == NULL) {
-        return TTFTP_OUT_OF_MEMORY;
+        return TFTP_OUT_OF_MEMORY;
     }
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 

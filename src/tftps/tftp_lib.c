@@ -1,16 +1,16 @@
 //
-//      TTFTP functions library, implementation
+//      TFTP functions library, implementation
 //      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftp_lib.c
-//      project:    ttftp library
+//      filename:   tftp_lib.c
+//      project:    tftp library
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
 //
 
 // Included Headers ////////////////////////////////////////////////////////////
-#include "ttftps_config.h"
+#include "tftps_config.h"
 
 #include <arpa/inet.h>
 // using htons(), ntohs(), inet_ntop()
@@ -41,8 +41,8 @@
 #include <sys/ioctl.h>
 // using FIONREAD
 
-#include "ttftp_types.h"
-#include "ttftp_lib.h"
+#include "tftp_types.h"
+#include "tftp_lib.h"
 
 
 // Implementation //////////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
 
 
     if (socket_ptr == NULL || address_ptr == NULL || port_str == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     // prepare a set of hints or preferences for the subsequent address lookup
@@ -73,12 +73,12 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
     result = getaddrinfo(address_str, port_str, &address_hints, &address_list);
     if (result != 0) {
 #ifdef DEBUG
-        fprintf(stderr, "TTFTP_ERROR: %s.\n", gai_strerror(result));
+        fprintf(stderr, "TFTP_ERROR: %s.\n", gai_strerror(result));
 #else
         fprintf(stderr, "Error: getaddrinfo: %s.\n", gai_strerror(result));
 #endif
         fflush(stderr);
-        return TTFTP_ERROR_GETADDRINFO;
+        return TFTP_ERROR_GETADDRINFO;
     }
 
     // go through the list and connect to the first valid address
@@ -97,7 +97,7 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
                            current->ai_protocol);
         if (socket_fd == -1) {
 #ifdef DEBUG
-            perror("TTFTP_ERROR");
+            perror("TFTP_ERROR");
 #else
             perror("Error: socket");
 #endif
@@ -112,7 +112,7 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
             bind(socket_fd, current->ai_addr, current->ai_addrlen) == -1) {
             close(socket_fd);
 #ifdef DEBUG
-            perror("TTFTP_ERROR");
+            perror("TFTP_ERROR");
 #else
             perror("Error: bind");
 #endif
@@ -127,13 +127,13 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
     // and no suitable address was found
     if (current == NULL) {
 #ifdef DEBUG
-        fprintf(stderr, "TTFTP_ERROR: Could not connect.\n");
+        fprintf(stderr, "TFTP_ERROR: Could not connect.\n");
 #else
         fprintf(stderr, "Error: could not connect.\n");
 #endif
         fflush(stderr);
         freeaddrinfo(address_list);// free the memory allocated by getaddrinfo()
-        return TTFTP_COULD_NOT_CONNECT;
+        return TFTP_COULD_NOT_CONNECT;
     }
 
     // return (copy) the address structure that was picked during the search
@@ -151,7 +151,7 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
         if (address_ptr->ai_addr == NULL) {
             // free the memory allocated by getaddrinfo()
             freeaddrinfo(address_list);
-            return TTFTP_OUT_OF_MEMORY;
+            return TFTP_OUT_OF_MEMORY;
         }
         *address_ptr->ai_addr = *current->ai_addr;  // structure is being copied
     }
@@ -163,7 +163,7 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
             free(address_ptr->ai_addr); // free the memory allocated above
             // free the memory allocated by getaddrinfo()
             freeaddrinfo(address_list);
-            return TTFTP_OUT_OF_MEMORY;
+            return TFTP_OUT_OF_MEMORY;
         }
         strcpy(address_ptr->ai_canonname, current->ai_canonname);
     }
@@ -174,7 +174,7 @@ int prepare_socket_and_address(int *socket_ptr, struct addrinfo *address_ptr,
     // free the memory allocated by getaddrinfo()
     freeaddrinfo(address_list);
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -182,11 +182,11 @@ int prepare_sender_address(struct addrinfo *sender_address_ptr) {
     struct sockaddr *sender_sockaddr_ptr;
 
     if (sender_address_ptr == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     if ((sender_sockaddr_ptr = malloc(sizeof(struct sockaddr))) == NULL) {
-        return TTFTP_OUT_OF_MEMORY;
+        return TFTP_OUT_OF_MEMORY;
     }
 
     // initialize only the fields that are going to be used
@@ -197,7 +197,7 @@ int prepare_sender_address(struct addrinfo *sender_address_ptr) {
     sender_address_ptr->ai_addr = sender_sockaddr_ptr;
     // all other fields are zeroed
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -212,15 +212,15 @@ void free_address(struct addrinfo *address_ptr) {
 int encode_rrq(rrq_packet_t *rrq_ptr, const char *file_name,
                const char *mode_name) {
     if (rrq_ptr == NULL || file_name == NULL || mode_name == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     if (strlen(file_name) > FILE_NAME_MAX_LEN) {
-        return TTFTP_FILE_NAME_TOO_LONG;
+        return TFTP_FILE_NAME_TOO_LONG;
     }
 
     if (strlen(mode_name) > MODE_NAME_MAX_LEN) {
-        return TTFTP_MODE_NAME_TOO_LONG;
+        return TFTP_MODE_NAME_TOO_LONG;
     }
 
     // initializing structure fields
@@ -230,7 +230,7 @@ int encode_rrq(rrq_packet_t *rrq_ptr, const char *file_name,
     strcpy(rrq_ptr->file_name, file_name);
     strcpy(rrq_ptr->mode_name, mode_name);
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -239,7 +239,7 @@ int decode_rrq(rrq_packet_t *rrq_ptr, const void *packet_ptr) {
 
 
     if (rrq_ptr == NULL || packet_ptr == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     file_name = (char *) ((rrq_packet_t *) packet_ptr)->text;
@@ -248,11 +248,11 @@ int decode_rrq(rrq_packet_t *rrq_ptr, const void *packet_ptr) {
             1;
 
     if (strlen(file_name) > FILE_NAME_MAX_LEN) {
-        return TTFTP_FILE_NAME_TOO_LONG;
+        return TFTP_FILE_NAME_TOO_LONG;
     }
 
     if (strlen(mode_name) > MODE_NAME_MAX_LEN) {
-        return TTFTP_MODE_NAME_TOO_LONG;
+        return TFTP_MODE_NAME_TOO_LONG;
     }
 
     rrq_ptr->opcode = htons(OPCODE_RRQ);
@@ -262,7 +262,7 @@ int decode_rrq(rrq_packet_t *rrq_ptr, const void *packet_ptr) {
     strcpy(rrq_ptr->file_name, file_name);
     strcpy(rrq_ptr->mode_name, mode_name);
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -270,7 +270,7 @@ int encode_dat(dat_packet_t *dat_packet_ptr, uint16_t block_number,
                const void *data, int data_size) {
     if (dat_packet_ptr == NULL || data == NULL ||
         data_size < 0 || data_size > MAX_DATA_SIZE) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     dat_packet_ptr->opcode = htons(OPCODE_DAT);
@@ -279,14 +279,14 @@ int encode_dat(dat_packet_t *dat_packet_ptr, uint16_t block_number,
     // the next field it's for local use only, no need to change endianness
     dat_packet_ptr->data_size = data_size;
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
 int decode_dat(dat_packet_t *dat_ptr, const void *packet_ptr,
                const int packet_size) {
     if (dat_ptr == NULL || packet_ptr == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     dat_ptr->opcode = ((dat_packet_t *) packet_ptr)->opcode;
@@ -296,31 +296,31 @@ int decode_dat(dat_packet_t *dat_ptr, const void *packet_ptr,
     // the next field it's for local use only, no need to change endianness
     dat_ptr->data_size = packet_size - DAT_HEADER_SIZE;
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
 int encode_ack(ack_packet_t *ack_ptr, uint16_t block_number) {
     if (ack_ptr == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     ack_ptr->opcode = htons(OPCODE_ACK);
     ack_ptr->number = htons(block_number);
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
 int decode_ack(ack_packet_t *ack_ptr, const void *packet_ptr) {
     if (ack_ptr == NULL || packet_ptr == NULL) {
-        return TTFTP_INVALID_PARAMETER;
+        return TFTP_INVALID_PARAMETER;
     }
 
     ack_ptr->opcode = ((ack_packet_t *) packet_ptr)->opcode;
     ack_ptr->number = ((ack_packet_t *) packet_ptr)->number;
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -369,7 +369,7 @@ int get_packet_size(void *packet_ptr) {
             break;
     }
 
-    return TTFTP_UNEXPECTED_PACKET;
+    return TFTP_UNEXPECTED_PACKET;
 }
 
 
@@ -388,7 +388,7 @@ int wait_for_packets(int socket, const long timeout) {
             if (errno == EINTR) {
 #ifdef DEBUG
                 fprintf(stderr,
-                        "TTFTP_ERROR: Interrupted by a signal. Retrying.\n");
+                        "TFTP_ERROR: Interrupted by a signal. Retrying.\n");
 #else
                 fprintf(stderr,
                         "Interrupted by a signal at tv_sec: %d\ttv_usec: %d\n",
@@ -397,21 +397,21 @@ int wait_for_packets(int socket, const long timeout) {
 #endif
                 continue;
             }
-            return TTFTP_ERROR_SELECT;
+            return TFTP_ERROR_SELECT;
         } else if (result == 0) {
 #ifdef DEBUG
             fprintf(stderr, "FLOWERROR: The operation timed out\n");
 #else
             fprintf(stderr, "The operation timed out.\n");
 #endif
-            return TTFTP_TIMEOUT;
+            return TFTP_TIMEOUT;
         } else // if result > 0
         {
 #ifndef DEBUG
 /// this is more of a debug message, not necessary otherwise
 ///            printf("A reply has arrived in time.\n");
 #endif
-            return TTFTP_SUCCESS;
+            return TFTP_SUCCESS;
         }
     } while (true);
 }
@@ -427,7 +427,7 @@ int flush_socket(int socket)        // FIONREAD
     // allocate buff_size, if unavailable - divide buff_size by 2 and try again
     while ((buff = malloc(buff_size)) == NULL && (buff_size /= 2) > 0);
     if (buff_size == 0) {
-        return TTFTP_OUT_OF_MEMORY;
+        return TFTP_OUT_OF_MEMORY;
     }
 #ifdef FLUSH_REPORTS
     printf("[ BEFORE FLUSH: buff_size: %d ]\n", buff_size);
@@ -438,9 +438,9 @@ int flush_socket(int socket)        // FIONREAD
         // check if there's any data on the socket
         result = ioctl(socket, FIONREAD, &bytes_pending);
         if (result == -1) {
-            perror("TTFTP_ERROR");
+            perror("TFTP_ERROR");
             free(buff);
-            return TTFTP_FAILURE;
+            return TFTP_FAILURE;
         }
 #ifdef FLUSH_REPORTS
         printf("[ FLUSHING: result: %d, pending %d bytes ]\n", result,
@@ -453,12 +453,12 @@ int flush_socket(int socket)        // FIONREAD
             bytes_received = recv(socket, buff, buff_size, 0);
             if (bytes_received == -1) {
 #ifdef DEBUG
-                perror("TTFTP_ERROR");
+                perror("TFTP_ERROR");
 #else
                 perror("Error: recv");
 #endif
                 free(buff);
-                return TTFTP_FAILURE;
+                return TFTP_FAILURE;
             }
 #ifdef FLUSH_REPORTS
             printf("[ FLUSHING: bytes received: %d ]\n", bytes_received);
@@ -476,7 +476,7 @@ int flush_socket(int socket)        // FIONREAD
     fflush(stdout);
 #endif
     free(buff);
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -489,15 +489,15 @@ int flush_socket2(int socket)       // I_NREAD
     // allocate buff_size, if unavailable - divide buff_size by 2 and try again
     while ((buff = malloc(buff_size)) == NULL && (buff_size /= 2) > 0);
     if (buff_size == 0) {
-        return TTFTP_OUT_OF_MEMORY;
+        return TFTP_OUT_OF_MEMORY;
     }
 
     // while there are messages on the socket
     while ((result = ioctl(socket, I_NREAD, &bytes_pending))) {
         if (result == -1) {
-            perror("TTFTP_ERROR");
+            perror("TFTP_ERROR");
             free(buff);
-            return TTFTP_FAILURE;
+            return TFTP_FAILURE;
         }
 #ifdef FLUSH_REPORTS
         printf("[ BEFORE FLUSH: result: %d, pending %d bytes ]\n", result,
@@ -510,12 +510,12 @@ int flush_socket2(int socket)       // I_NREAD
             bytes_received = recv(socket, buff, buff_size, 0);
             if (bytes_received == -1) {
 #ifdef DEBUG
-                perror("TTFTP_ERROR");
+                perror("TFTP_ERROR");
 #else
                 perror("Error: recv");
 #endif
                 free(buff);
-                return TTFTP_FAILURE;
+                return TFTP_FAILURE;
             } else if (bytes_received == 0) {
                 break;
             }
@@ -534,7 +534,7 @@ int flush_socket2(int socket)       // I_NREAD
 #endif
 
     free(buff);
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -543,21 +543,21 @@ int flush_socket3(int socket)       // I_FLUSH
     // flush all the read and write queues
     if (ioctl(socket, I_FLUSH, FLUSHRW) == -1) {
 #ifdef DEBUG
-        perror("TTFTP_ERROR");
+        perror("TFTP_ERROR");
 #else
         perror("Error: ioctl");
 #endif
-        return TTFTP_FAILURE;
+        return TFTP_FAILURE;
     }
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
 int flush_socket_verbose(int socket) {
     int result = flush_socket(socket);
 
-    if (result == TTFTP_SUCCESS) {
+    if (result == TFTP_SUCCESS) {
         printf("The socket has been flushed successfully.\n");
     } else {
         printf("The socket flush failed.\n");

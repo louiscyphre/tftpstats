@@ -1,9 +1,9 @@
 //
-//      TTFTPC main file
+//      TFTPC main file
 //      ~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftpc_main.c
-//      project:    ttftpc
+//      filename:   tftpc_main.c
+//      project:    tftpc
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
@@ -11,7 +11,7 @@
 
 // Included Headers ////////////////////////////////////////////////////////////
 
-#include "ttftpc_config.h"
+#include "tftpc_config.h"
 
 #include <arpa/inet.h>
 // using htons(), ntohs(), inet_ntop()
@@ -35,9 +35,9 @@
 #include <stdbool.h>
 // using true
 
-#include "ttftp_types.h"
-#include "ttftp_lib.h"
-#include "ttftp_resources.h"
+#include "tftp_types.h"
+#include "tftp_lib.h"
+#include "tftp_resources.h"
 
 // Declarations ////////////////////////////////////////////////////////////////
 
@@ -102,7 +102,7 @@ int tftpc_run(int argc, char *argv[]) {
             perror("Error: sendto");
             free_resources(&resources);
             fflush(stderr);
-            return TTFTP_ERROR_SENDTO;
+            return TFTP_ERROR_SENDTO;
         }
 
         if (result != packet_size) {
@@ -110,7 +110,7 @@ int tftpc_run(int argc, char *argv[]) {
                     result, packet_size);
             free_resources(&resources);
             fflush(stderr);
-            return TTFTP_PACKET_SENT_PARTIALLY;
+            return TFTP_PACKET_SENT_PARTIALLY;
         }
 
         printf("Data request sent successfully (%d bytes).\n"
@@ -118,22 +118,22 @@ int tftpc_run(int argc, char *argv[]) {
 
         // if there's no reply in PACKET_TIMEOUT seconds - repeat data request
         switch (wait_for_packets(resources.client_socket, PACKET_TIMEOUT)) {
-            case TTFTP_ERROR_SELECT:
+            case TFTP_ERROR_SELECT:
                 perror("Error: select");
                 free_resources(&resources);
                 fflush(stderr);
-                return TTFTP_ERROR_SELECT;
+                return TFTP_ERROR_SELECT;
                 break;
-            case TTFTP_TIMEOUT:
+            case TFTP_TIMEOUT:
                 if (++timeout_counter == MAX_TIMEOUTS) {
                     fprintf(stderr, "Error: the maximal number of timeouts"
                                     " has been reached.\n");
                     free_resources(&resources);
                     fflush(stderr);
-                    return TTFTP_MAX_TIMEOUTS_REACHED;
+                    return TFTP_MAX_TIMEOUTS_REACHED;
                 }
                 break;
-            case TTFTP_SUCCESS:
+            case TFTP_SUCCESS:
                 no_reply = false;
                 break;
             default:
@@ -141,7 +141,7 @@ int tftpc_run(int argc, char *argv[]) {
                         "Error: unexpected failure during RRQ sending.\n");
                 free_resources(&resources);
                 fflush(stderr);
-                return TTFTP_FAILURE;
+                return TFTP_FAILURE;
         }
 
         if (++client_failures == MAX_TIMEOUTS + 1) // anti-infinite-loop feature
@@ -150,7 +150,7 @@ int tftpc_run(int argc, char *argv[]) {
             fprintf(stderr, "Error: unexpected failure during RRQ sending.\n");
             free_resources(&resources);
             fflush(stderr);
-            return TTFTP_FAILURE;
+            return TFTP_FAILURE;
         }
     } while (no_reply);
 
@@ -161,7 +161,7 @@ int tftpc_run(int argc, char *argv[]) {
         perror("Error: open");
         free_resources(&resources);
         fflush(stderr);
-        return TTFTP_ERROR_OPEN;
+        return TFTP_ERROR_OPEN;
     }
 
     usec_stopper();              // the first run is needed for initialization
@@ -179,7 +179,7 @@ int tftpc_run(int argc, char *argv[]) {
             perror("Error: recvfrom");
             free_resources(&resources);
             fflush(stderr);
-            return TTFTP_ERROR_RECVFROM;
+            return TFTP_ERROR_RECVFROM;
         }
 
         if (packet_size < 2) {
@@ -187,7 +187,7 @@ int tftpc_run(int argc, char *argv[]) {
                             "(%d bytes).\n", packet_size);
             free_resources(&resources);
             fflush(stderr);
-            return TTFTP_UNEXPECTED_PACKET;
+            return TFTP_UNEXPECTED_PACKET;
         }
 
         // the packet is big enough to have an opcode, let's try to decode it
@@ -198,7 +198,7 @@ int tftpc_run(int argc, char *argv[]) {
                             "bytes, type: %d).\n", packet_size, packet_type);
             free_resources(&resources);
             fflush(stderr);
-            return TTFTP_UNEXPECTED_PACKET;
+            return TFTP_UNEXPECTED_PACKET;
         }
 
         decode_dat(&dat_packet, resources.buffer, packet_size);
@@ -254,13 +254,13 @@ int tftpc_run(int argc, char *argv[]) {
             }
 
             switch (wait_for_packets(resources.client_socket, PACKET_TIMEOUT)) {
-                case TTFTP_ERROR_SELECT:
+                case TFTP_ERROR_SELECT:
                     perror("Error: select");
                     free_resources(&resources);
                     fflush(stderr);
-                    return TTFTP_ERROR_SELECT;
+                    return TFTP_ERROR_SELECT;
                     break;
-                case TTFTP_TIMEOUT:
+                case TFTP_TIMEOUT:
                     printf("Resending ACK for data packet no.%d\n",
                            ntohs(dat_packet.number));
 
@@ -269,10 +269,10 @@ int tftpc_run(int argc, char *argv[]) {
                                         " has been reached.\n");
                         free_resources(&resources);
                         fflush(stderr);
-                        return TTFTP_MAX_TIMEOUTS_REACHED;
+                        return TFTP_MAX_TIMEOUTS_REACHED;
                     }
                     break;
-                case TTFTP_SUCCESS:
+                case TFTP_SUCCESS:
                     no_reply = false;
                     break;
             }
@@ -283,7 +283,7 @@ int tftpc_run(int argc, char *argv[]) {
     printf("Operation complete. All sockets closed.\n");
     fflush(stdout);
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -294,9 +294,9 @@ void prepare_program_arguments(char *args[], int argc, char *argv[]) {
 
     if (argc < 1 || argc > 4) {
         fprintf(stderr, "Usage: %s host port file\n"
-                        "\thost - a TTFTP server name or its IP address\n"
-                        "\tport - a TTFTP server port number\n"
-                        "\tfile - a name of a file on the TTFTP server\n",
+                        "\thost - a TFTP server name or its IP address\n"
+                        "\tport - a TFTP server port number\n"
+                        "\tfile - a name of a file on the TFTP server\n",
                 args[0]);
         exit(EXIT_FAILURE);
     }

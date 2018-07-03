@@ -1,14 +1,10 @@
-#ifndef __TTFTPS_CONFIG_H
-#define __TTFTPS_CONFIG_H
+#ifndef __TFTPC_CONFIG_H
+#define __TFTPC_CONFIG_H
 
-#define TTFTPS_VERSION_MAJOR @TTFTPS_VERSION_MAJOR@
-#define TTFTPS_VERSION_MINOR @TTFTPS_VERSION_MINOR@
-#define TTFTPS_VERSION_PATCH @TTFTPS_VERSION_PATCH@
-#define TTFTPS_VERSION @TTFTPS_VERSION@
-
-
-//#define _GNU_SOURCE
-// needed for C99 standard compliance
+#define TFTPC_VERSION_MAJOR @TFTPC_VERSION_MAJOR@
+#define TFTPC_VERSION_MINOR @TFTPC_VERSION_MINOR@
+#define TFTPC_VERSION_PATCH @TFTPC_VERSION_PATCH@
+#define TFTPC_VERSION @TFTPC_VERSION@
 
 // Switches ////////////////////////////////////////////////////////////////////
 
@@ -38,20 +34,21 @@
 #define OPCODE_ACK          4
 #define OPCODE_ERR          5
 
-#define MAX_SERVER_FAILURES             3
-#define MAX_TRANSMISSION_FAILURES       7
+// Definitions /////////////////////////////////////////////////////////////////
 
-#define MAX_RECVFROM_RETRIES            3
-#define MAX_SENDTO_RETRIES              3
-
-#define MAX_INVALID_PACKETS             0
-
-#ifdef FAST_TRANSMISSION                        // defined in ttftp_types.h
-    #define PACKET_TIMEOUT              1       // default 3
-    #define MAX_TIMEOUTS                20      // default 7
+#ifdef FAST_TRANSMISSION        // defined in TFTP_types.h
+#define PACKET_TIMEOUT          1       // default 3
+#define MAX_TIMEOUTS            20      // default 7
 #else
-    #define PACKET_TIMEOUT              3
-    #define MAX_TIMEOUTS                7
+#define PACKET_TIMEOUT          3
+#define MAX_TIMEOUTS            7
 #endif
 
-#endif /* __TTFTPS_CONFIG_H */
+#define MAX_CLIENT_FAILURES     5
+#define MAX_INVALID_PACKETS     10
+
+
+//#define _GNU_SOURCE
+// needed for C99 standard compliance
+
+#endif /* __TFTPC_CONFIG_H */

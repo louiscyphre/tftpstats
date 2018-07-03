@@ -1,16 +1,16 @@
 //
-//      TTFTPS main file
+//      TFTPS main file
 //      ~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftps_main.c
-//      project:    ttftps
+//      filename:   tftps_main.c
+//      project:    tftps
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
 //
 
 // Included Headers ////////////////////////////////////////////////////////////
-#include "ttftps_config.h"
+#include "tftps_config.h"
 
 #include <arpa/inet.h>
 // using htons(), ntohs(), inet_ntop()
@@ -36,10 +36,10 @@
 #include <errno.h>
 // using errno, EINTR
 
-#include "ttftp_types.h"
-#include "ttftp_lib.h"
-#include "ttftp_resources.h"
-#include "ttftps_main.h"
+#include "tftp_types.h"
+#include "tftp_lib.h"
+#include "tftp_resources.h"
+#include "tftps_main.h"
 
 
 // Implementation //////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
         result = recieve_packet(&resources, OPCODE_RRQ, &packet_size,
                                 MAX_RECVFROM_RETRIES,
                                 MAX_INVALID_PACKETS, MIN_PACKET_SIZE);
-        if (result != TTFTP_SUCCESS) {
+        if (result != TFTP_SUCCESS) {
             break;  // receive_packet() couldn't receive an RRQ, terminate
         }           // (breaking the main loop terminates the server)
 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
         saved_errno = errno;    // save errno for later analysis
         if (resources.fd == -1) {
 #ifdef DEBUG
-            perror("TTFTP_ERROR");
+            perror("TFTP_ERROR");
             flush_socket(resources.server_socket);
 #else
             perror("Error: open");
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
                 failure = true;
                 server_failures++;
 #ifdef DEBUG
-                perror("TTFTP_ERROR");
+                perror("TFTP_ERROR");
                 flush_socket(resources.server_socket);
 #else
                 perror("Error: read");
@@ -171,19 +171,19 @@ int main(int argc, char *argv[]) {
             result = send_data_packet(&dat_packet, &resources, PACKET_TIMEOUT,
                                       MAX_TIMEOUTS, MAX_SENDTO_RETRIES);
             switch (result) {
-                case TTFTP_ERROR_RECVFROM:          // fall through
-                case TTFTP_ERROR_SELECT:
+                case TFTP_ERROR_RECVFROM:          // fall through
+                case TFTP_ERROR_SELECT:
                     failure = true; // set flag that will lead out to main loop
                     server_failures++;
                     close(resources.fd);
                     break;
-                case TTFTP_MAX_TIMEOUTS_REACHED:    // fall through
-                case TTFTP_MAX_INVALID_PACKETS_REACHED:
+                case TFTP_MAX_TIMEOUTS_REACHED:    // fall through
+                case TFTP_MAX_INVALID_PACKETS_REACHED:
                     failure = true; // set flag that will lead out to main loop
 //                    transmission_failures++;
                     close(resources.fd);
                     break;
-                case TTFTP_SUCCESS:
+                case TFTP_SUCCESS:
                     failure = false;
 #ifndef DEBUG
                     printf("File transfer rate: %.2f KB/sec\n", // KB not KiB !
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
            "All the resources have been released. Terminating.\n");
     fflush(stdout);
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
@@ -249,9 +249,9 @@ void prepare_program_arguments(char *args[], int argc, char *argv[]) {
 
 
 //
-// returns:     TTFTP_ERROR_RECVFROM
-//              TTFTP_MAX_INVALID_PACKETS_REACHED
-//              TTFTP_SUCCESS
+// returns:     TFTP_ERROR_RECVFROM
+//              TFTP_MAX_INVALID_PACKETS_REACHED
+//              TFTP_SUCCESS
 
 int recieve_packet(resources_t *resources_ptr, const uint16_t requested_opcode,
                    int *packet_size_ptr, const int max_recv_retries,
@@ -269,7 +269,7 @@ int recieve_packet(resources_t *resources_ptr, const uint16_t requested_opcode,
             if (errno == EINTR && ++recvfrom_retries < max_recv_retries) {
 #ifdef DEBUG
                 fprintf(stderr,
-                        "TTFTP_ERROR: Interrupted by a signal. Retrying.\n");
+                        "TFTP_ERROR: Interrupted by a signal. Retrying.\n");
                 // the data could be read partially - flush the socket
                 flush_socket(resources_ptr->server_socket);
 #else
@@ -280,11 +280,11 @@ int recieve_packet(resources_t *resources_ptr, const uint16_t requested_opcode,
                 continue;   // continue listening on the port or retry receiving
             }
 #ifdef DEBUG
-            perror("TTFTP_ERROR");
+            perror("TFTP_ERROR");
 #else
             perror("Error: recvfrom");
 #endif
-            return TTFTP_ERROR_RECVFROM;
+            return TFTP_ERROR_RECVFROM;
         }
 
         *packet_size_ptr = result;  // return the packet size to caller
@@ -304,7 +304,7 @@ int recieve_packet(resources_t *resources_ptr, const uint16_t requested_opcode,
             if (++invalid_packets < max_invalid_packets) {
                 continue;   // continue listening on the port
             }
-            return TTFTP_MAX_INVALID_PACKETS_REACHED;
+            return TFTP_MAX_INVALID_PACKETS_REACHED;
         }
 
         // if we are here - the packet is big enough to have an opcode,
@@ -323,20 +323,20 @@ int recieve_packet(resources_t *resources_ptr, const uint16_t requested_opcode,
             if (++invalid_packets < max_invalid_packets) {
                 continue;   // continue listening on the port
             }
-            return TTFTP_MAX_INVALID_PACKETS_REACHED;
+            return TFTP_MAX_INVALID_PACKETS_REACHED;
         }
     } while (false); // if we get here - a valid packet was received
 
-    return TTFTP_SUCCESS;
+    return TFTP_SUCCESS;
 }
 
 
 //
-//  returns:    TTFTP_ERROR_RECVFROM
-//              TTFTP_ERROR_SELECT
-//              TTFTP_MAX_TIMEOUTS_REACHED
-//              TTFTP_MAX_INVALID_PACKETS_REACHED
-//              TTFTP_FAILURE
+//  returns:    TFTP_ERROR_RECVFROM
+//              TFTP_ERROR_SELECT
+//              TFTP_MAX_TIMEOUTS_REACHED
+//              TFTP_MAX_INVALID_PACKETS_REACHED
+//              TFTP_FAILURE
 //
 int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
                      const int packet_timeout, const int max_timeouts,
@@ -365,11 +365,11 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
                 continue;   // continue listening on the port or retry receiving
             }
 #ifdef DEBUG
-            perror("TTFTP_ERROR");
+            perror("TFTP_ERROR");
 #else
             perror("Error: sendto");
 #endif
-            return TTFTP_ERROR_RECVFROM;
+            return TFTP_ERROR_RECVFROM;
         }
 
         sendto_retries = 0; // on success - reset failures count
@@ -384,14 +384,14 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
 #endif
         switch (wait_for_packets(resources_ptr->server_socket,
                                  packet_timeout)) {
-            case TTFTP_ERROR_SELECT:
+            case TFTP_ERROR_SELECT:
 #ifdef DEBUG
-                perror("TTFTP_ERROR");
+                perror("TFTP_ERROR");
 #else
                 perror("Error: select");
 #endif
-                return TTFTP_ERROR_SELECT;
-            case TTFTP_TIMEOUT:
+                return TFTP_ERROR_SELECT;
+            case TFTP_TIMEOUT:
                 if (++timeout_counter == max_timeouts) {
 #ifdef DEBUG
                     fprintf(stderr, "FLOWERROR: the maximal number of "
@@ -400,7 +400,7 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
                     fprintf(stderr, "Error: the maximal number of timeouts "
                                     "has been reached.\n");
 #endif
-                    return TTFTP_MAX_TIMEOUTS_REACHED;
+                    return TFTP_MAX_TIMEOUTS_REACHED;
                 }
 #ifndef DEBUG
                 printf("Resending data packet no.%d\n",
@@ -408,7 +408,7 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
 #endif
                 continue;       // send DATa packet again
                 break;
-            case TTFTP_SUCCESS:
+            case TFTP_SUCCESS:
                 break;
         }
 
@@ -424,7 +424,7 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
                                 ACK_PACKET_SIZE);   //MIN_PACKET_SIZE
 
         // decode the packet and check if it's the ACK that we expect to receive
-        if (result == TTFTP_SUCCESS &&
+        if (result == TFTP_SUCCESS &&
             get_packet_type(resources_ptr->buffer) == OPCODE_ACK) {
 #ifdef DEBUG
             printf("IN:ACK, %d\n",get_packet_number(resources_ptr->buffer));
@@ -436,7 +436,7 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
 #endif
             if (get_packet_number(resources_ptr->buffer) ==
                 get_packet_number(dat_packet_ptr)) {
-                return TTFTP_SUCCESS;
+                return TFTP_SUCCESS;
             } else    // the packet was ACK with wrong block number in it
             {
 #ifdef DEBUG
@@ -460,10 +460,10 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
         }
 
         // no invalid packets allowed
-        if (result == TTFTP_MAX_INVALID_PACKETS_REACHED) {
+        if (result == TFTP_MAX_INVALID_PACKETS_REACHED) {
             return result;
         }
     } while (timeout_counter < max_timeouts);
 
-    return TTFTP_FAILURE;   // we get here on failure only
+    return TFTP_FAILURE;   // we get here on failure only
 }

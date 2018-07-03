@@ -1,15 +1,15 @@
 //
-//      TTFTPS main header file
+//      TFTPS main header file
 //      ~~~~~~~~~~~~~~~~~~~~~~~
 //
-//      filename:   ttftps_main.h
-//      project:    ttftps
+//      filename:   tftps_main.h
+//      project:    tftps
 //
 //      authors:    AKS, GMG
 //                  Technion, Spring 2009
 //
-#ifndef __TTFTPS_MAIN_H
-#define __TTFTPS_MAIN_H
+#ifndef __TFTPS_MAIN_H
+#define __TFTPS_MAIN_H
 
 // Declarations ////////////////////////////////////////////////////////////////
 
@@ -27,4 +27,4 @@ int send_data_packet(dat_packet_t *dat_packet_ptr, resources_t *resources_ptr,
                      const int max_send_retries);
 
 
-#endif // __TTFTPS_MAIN_H
+#endif // __TFTPS_MAIN_H

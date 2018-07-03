@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(TFTPC_PROGRAM ttftpc)
+set(TFTPC_PROGRAM tftpc)
 
 project(${TFTPC_PROGRAM} C)
 
 set(CMAKE_C_STANDARD 11)
 # The version number.
-set(TTFTPC_VERSION_MAJOR 1)
-set(TTFTPC_VERSION_MINOR 0)
-set(TTFTPC_VERSION_PATCH 0)
-set(TTFTPC_VERSION ${TTFTPC_VERSION_MAJOR}.${TTFTPC_VERSION_MINOR}.${TTFTPC_VERSION_PATCH})
+set(TFTPC_VERSION_MAJOR 1)
+set(TFTPC_VERSION_MINOR 0)
+set(TFTPC_VERSION_PATCH 0)
+set(TFTPC_VERSION ${TFTPC_VERSION_MAJOR}.${TFTPC_VERSION_MINOR}.${TFTPC_VERSION_PATCH})
 
 
 set(CMAKE_COLOR_MAKEFILE ON)
@@ -34,8 +34,8 @@ else ()
         ")
 endif ()
 
-set(PROJECT_H_FILES ttftp_lib.h ttftp_types.h ttftp_resources.h)
-set(PROJECT_C_FILES ttftp_lib.c ttftp_resources.c ttftpc_driver.c)
+set(PROJECT_H_FILES tftp_lib.h tftp_types.h tftp_resources.h)
+set(PROJECT_C_FILES tftp_lib.c tftp_resources.c tftpc_driver.c)
 
 configure_file(
         "${CMAKE_SOURCE_DIR}/${TFTPC_PROGRAM}_config.h.in"
@@ -54,9 +54,7 @@ set(CMAKE_C_COMPILER "gcc")
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${TARGET_INCLUDE_DIR})
 
-add_library(${TFTPC_PROGRAM} STATIC ttftp_lib.c ttftp_lib.h ttftp_types.h
-        ttftp_resources.c ttftp_resources.h ttftp_types.h ttftp_lib.h
-        ttftpc_config.h ttftpc_driver.c)
+add_library(${TFTPC_PROGRAM} STATIC ${PROJECT_H_FILES} ${PROJECT_C_FILES})
 
-target_compile_options(ttftpc PUBLIC -Wall -Wextra -pedantic)
+target_compile_options(tftpc PUBLIC -Wall -Wextra -pedantic)
 
