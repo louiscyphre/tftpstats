@@ -19,8 +19,7 @@ before_install:
 before_script:
   - mkdir /home/travis/build/bin
   - mkdir /home/travis/build/bin/tftpstats
-  - cd    /home/travis/build/bin/tftpstats
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=. && make
+  - cmake /home/travis/build/louiscyphre/tftpstats -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/home/travis/build/bin && make
 
 script:
   - make
