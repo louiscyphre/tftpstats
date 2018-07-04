@@ -35,7 +35,7 @@ callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
 }
 
 int main() {
-    
+
     char error_buffer[PCAP_ERRBUF_SIZE];
     char *device;
 
