@@ -56,5 +56,5 @@ include_directories(${TARGET_INCLUDE_DIR})
 
 add_executable(${TFTPS_PROGRAM} ${PROJECT_C_FILES})
 
-target_compile_options(tftps PUBLIC -Wall -Wextra -pedantic)
+target_compile_options(${TFTPS_PROGRAM} PUBLIC -Wall -Wextra -pedantic)
 

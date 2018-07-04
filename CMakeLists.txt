@@ -17,7 +17,7 @@ option(ENABLE_CCACHE "Use ccache" ON)
 include(ProcessorCount)
 ProcessorCount(N)
 if(NOT N EQUAL 0)
-  set(CTEST_BUILD_FLAGS "-j ${N}") 
+  set(CTEST_BUILD_FLAGS "-j ${N}")
   set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
 endif()
 
@@ -83,12 +83,7 @@ add_executable(${TFTPSTATS_PROGRAM} ${PROJECT_C_FILES})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPC_PROGRAM})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPS_PROGRAM})
 
-set(TFTPC_PATH ${PROJ_BINARY_DIR}/${TFTPC_PROGRAM})
-
 target_compile_options(${TFTPSTATS_PROGRAM} PUBLIC -Wall -Wextra -pedantic)
-target_link_libraries(${TFTPSTATS_PROGRAM}
-    ${TFTPC_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}${TFTPC_PROGRAM}${CMAKE_STATIC_LIBRARY_SUFFIX}
-)
 
 add_custom_target(clean-all
    COMMAND ${CMAKE_BUILD_TOOL} clean

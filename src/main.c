@@ -25,14 +25,15 @@ typedef enum {
 } tftpstats_result_t;
 
 int main() {
-    uid_t real_uid, effective_uid, saved_uid;/* Real, Effective, Saved user * ID */
-    gid_t real_gid, effective_gid, saved_gid; /* Real, Effective, Saved group * ID */
+    uid_t real_uid, effective_uid, saved_uid;
+    gid_t real_gid, effective_gid, saved_gid;
     int uid_error, gid_error;
 
     if (getresuid(&real_uid, &effective_uid, &saved_uid) == -1) {
         fprintf(stderr, "Cannot obtain user identity: %s.\n", strerror(errno));
         return TFTPSTATS_FAILURE;
     }
+
     if (getresgid(&real_gid, &effective_gid, &saved_gid) == -1) {
         fprintf(stderr, "Cannot obtain group identity: %s.\n", strerror(errno));
         return TFTPSTATS_FAILURE;
@@ -46,52 +47,47 @@ int main() {
         return TFTPSTATS_FAILURE;
     }
 
-    /* Switch to target user. setuid bit handles this, but doing it again does no harm. */
+    /* Switch to target user. setuid bit handles this, but doing it again
+     * does  no harm. */
     if (seteuid((uid_t) TARGET_UID) == -1) {
         fprintf(stderr, "Insufficient user privileges.\n");
         return TFTPSTATS_FAILURE;
     }
 
-    /* Switch to target group. setgid bit handles this, but doing it again does no harm.
+    /* Switch to target group. setgid bit handles this, but doing it again does
+     * no harm.
      * If TARGET_UID == 0, we need no setgid bit, as root has the privilege. */
     if (setegid((gid_t) TARGET_GID) == -1) {
         fprintf(stderr, "Insufficient group privileges.\n");
         return TFTPSTATS_FAILURE;
     }
 
-    pid_t pid;
-    if ((pid = fork()) < 0) {
-        fprintf(stderr, "[ERROR] fork(): %s\n", strerror(errno));
-        return TFTPSTATS_FAILURE;
-    } else if (pid == 0) {
-        /* Drop privileges for child process. */
-        gid_error = 0;
-        if (setresgid(real_gid, real_gid, real_gid) == -1) {
-            gid_error = errno;
-            if (!gid_error)
-                gid_error = EINVAL;
-        }
-        uid_error = 0;
-        if (setresuid(real_uid, real_uid, real_uid) == -1) {
-            uid_error = errno;
-            if (!uid_error)
-                uid_error = EINVAL;
-        }
-        if (uid_error || gid_error) {
-            if (uid_error)
-                fprintf(stderr, "Cannot drop user privileges: %s.\n",
-                        strerror(uid_error));
-            if (gid_error)
-                fprintf(stderr, "Cannot drop group privileges: %s.\n",
-                        strerror(gid_error));
-            return TFTPSTATS_FAILURE;
-        }
-
-    }
     /* ... privileged operations ... */
+    printf("Hi from tftpstats. %d %d %d\n",real_uid, effective_uid,
+           saved_uid );
 
-
-
+    /* Drop privileges */
+    gid_error = 0;
+    if (setresgid(real_gid, real_gid, real_gid) == -1) {
+        gid_error = errno;
+        if (!gid_error)
+            gid_error = EINVAL;
+    }
+    uid_error = 0;
+    if (setresuid(real_uid, real_uid, real_uid) == -1) {
+        uid_error = errno;
+        if (!uid_error)
+            uid_error = EINVAL;
+    }
+    if (uid_error || gid_error) {
+        if (uid_error)
+            fprintf(stderr, "Cannot drop user privileges: %s.\n",
+                    strerror(uid_error));
+        if (gid_error)
+            fprintf(stderr, "Cannot drop group privileges: %s.\n",
+                    strerror(gid_error));
+        return TFTPSTATS_FAILURE;
+    }
 
     /* ... unprivileged operations ... */
 

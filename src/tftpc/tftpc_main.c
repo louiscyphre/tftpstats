@@ -46,7 +46,7 @@ void prepare_program_arguments(char *args[], int argc, char *argv[]);
 
 // Implementation //////////////////////////////////////////////////////////////
 
-int tftpc_run(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     resources_t resources;              // the application resources structure
     int result = 0,
             packet_size = 0,

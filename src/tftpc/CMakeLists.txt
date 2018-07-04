@@ -35,7 +35,7 @@ else ()
 endif ()
 
 set(PROJECT_H_FILES tftp_lib.h tftp_types.h tftp_resources.h)
-set(PROJECT_C_FILES tftp_lib.c tftp_resources.c tftpc_driver.c)
+set(PROJECT_C_FILES tftp_lib.c tftp_resources.c tftpc_main.c)
 
 configure_file(
         "${CMAKE_SOURCE_DIR}/${TFTPC_PROGRAM}_config.h.in"
@@ -54,7 +54,7 @@ set(CMAKE_C_COMPILER "gcc")
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${TARGET_INCLUDE_DIR})
 
-add_library(${TFTPC_PROGRAM} STATIC ${PROJECT_H_FILES} ${PROJECT_C_FILES})
+add_executable(${TFTPC_PROGRAM} ${PROJECT_C_FILES})
 
-target_compile_options(tftpc PUBLIC -Wall -Wextra -pedantic)
+target_compile_options(${TFTPC_PROGRAM} PUBLIC -Wall -Wextra -pedantic)
 
