@@ -12,6 +12,7 @@ set(PROJ_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 set(CMAKE_FILES_DIRECTORY ${PROJ_SOURCE_DIR}/cmake)
 set(PROJ_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 
+
 option(ENABLE_CCACHE "Use ccache" ON)
 
 include(ProcessorCount)
@@ -84,6 +85,7 @@ add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPC_PROGRAM})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPS_PROGRAM})
 
 target_compile_options(${TFTPSTATS_PROGRAM} PUBLIC -Wall -Wextra -pedantic)
+target_link_libraries(${TFTPSTATS_PROGRAM} -lpcap)
 
 add_custom_target(clean-all
    COMMAND ${CMAKE_BUILD_TOOL} clean

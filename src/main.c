@@ -9,7 +9,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-
+#include <pcap/pcap.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netinet/if_ether.h>
 // Types ///////////////////////////////////////////////////////////////////////
 
 typedef enum {
@@ -24,72 +29,28 @@ typedef enum {
     TFTPSTATS_OUT_OF_MEMORY
 } tftpstats_result_t;
 
+
+void
+callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
+}
+
 int main() {
-    uid_t real_uid, effective_uid, saved_uid;
-    gid_t real_gid, effective_gid, saved_gid;
-    int uid_error, gid_error;
+    
+    char error_buffer[PCAP_ERRBUF_SIZE];
+    char *device;
 
-    if (getresuid(&real_uid, &effective_uid, &saved_uid) == -1) {
-        fprintf(stderr, "Cannot obtain user identity: %s.\n", strerror(errno));
-        return TFTPSTATS_FAILURE;
-    }
-
-    if (getresgid(&real_gid, &effective_gid, &saved_gid) == -1) {
-        fprintf(stderr, "Cannot obtain group identity: %s.\n", strerror(errno));
-        return TFTPSTATS_FAILURE;
-    }
-    if (real_uid != (uid_t) TARGET_UID && real_uid < (uid_t) MIN_UID) {
-        fprintf(stderr, "Invalid user.\n");
-        return TFTPSTATS_FAILURE;
-    }
-    if (real_gid != (gid_t) TARGET_UID && real_gid < (gid_t) MIN_GID) {
-        fprintf(stderr, "Invalid group.\n");
-        return TFTPSTATS_FAILURE;
+    device = pcap_lookupdev(error_buffer);
+    if (device == NULL) {
+        printf("%s\n", error_buffer);
+        exit(1);
     }
 
-    /* Switch to target user. setuid bit handles this, but doing it again
-     * does  no harm. */
-    if (seteuid((uid_t) TARGET_UID) == -1) {
-        fprintf(stderr, "Insufficient user privileges.\n");
-        return TFTPSTATS_FAILURE;
+    pcap_t *pcap_resource;
+    pcap_resource = pcap_open_live(device, BUFSIZ, 0, -1, error_buffer);
+    if (pcap_resource == NULL) {
+        printf("pcap_open_live(): %s\n", error_buffer);
+        exit(1);
     }
-
-    /* Switch to target group. setgid bit handles this, but doing it again does
-     * no harm.
-     * If TARGET_UID == 0, we need no setgid bit, as root has the privilege. */
-    if (setegid((gid_t) TARGET_GID) == -1) {
-        fprintf(stderr, "Insufficient group privileges.\n");
-        return TFTPSTATS_FAILURE;
-    }
-
-    /* ... privileged operations ... */
-    printf("Hi from tftpstats. %d %d %d\n",real_uid, effective_uid,
-           saved_uid );
-
-    /* Drop privileges */
-    gid_error = 0;
-    if (setresgid(real_gid, real_gid, real_gid) == -1) {
-        gid_error = errno;
-        if (!gid_error)
-            gid_error = EINVAL;
-    }
-    uid_error = 0;
-    if (setresuid(real_uid, real_uid, real_uid) == -1) {
-        uid_error = errno;
-        if (!uid_error)
-            uid_error = EINVAL;
-    }
-    if (uid_error || gid_error) {
-        if (uid_error)
-            fprintf(stderr, "Cannot drop user privileges: %s.\n",
-                    strerror(uid_error));
-        if (gid_error)
-            fprintf(stderr, "Cannot drop group privileges: %s.\n",
-                    strerror(gid_error));
-        return TFTPSTATS_FAILURE;
-    }
-
-    /* ... unprivileged operations ... */
-
+    pcap_loop(pcap_resource, -1, callback, NULL);
     return 0;
 }

@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
             timeout_counter = 0,
             last_data_packet_size = 0,
             last_data_packet_number = 0;
-    char *args[] = {"tftpc", "127.0.0.1", "16770", "file.tst"}; // test defaults
+    char *args[] = {"tftpc", "127.0.0.1", "6969", "file.tst"}; // test defaults
     char ip_str[INET_ADDRSTRLEN];       // a buffer for an IP address string
     bool no_reply = true;
     rrq_packet_t rrq_packet;
