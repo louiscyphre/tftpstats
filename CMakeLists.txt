@@ -4,16 +4,26 @@ set(TFTPSTATS_PROGRAM tftpstats)
 
 project(${TFTPSTATS_PROGRAM} C)
 
-set(CMAKE_C_STANDARD 11)
-
-
 set(CMAKE_COLOR_MAKEFILE   ON)
 set(PROJ_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 set(CMAKE_FILES_DIRECTORY ${PROJ_SOURCE_DIR}/cmake)
 set(PROJ_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 
+set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_C_STANDARD 11)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+include("${CMAKE_FILES_DIRECTORY}/${TFTPSTATS_PROGRAM}Utils.cmake")
+
+find_package(Byacc REQUIRED)
+find_package(Flex REQUIRED)
+
+if(NOT DEFINED TFTPSTATS_GCC AND CMAKE_C_COMPILER_ID MATCHES "GNU")
+  set(TFTPSTATS_GCC 1)
+endif()
 
 option(ENABLE_CCACHE "Use ccache" ON)
+option(ENABLE_BUILD_HARDENING "Enable build hardening" ON)
 
 include(ProcessorCount)
 ProcessorCount(N)
@@ -70,8 +80,6 @@ ExternalProject_Add(${TFTPS_PROGRAM}
     LOG_TEST 0
 )
 
-set(CMAKE_C_COMPILER "gcc")
-
 configure_file(
         "${PROJ_SOURCE_DIR}/src/${TFTPSTATS_PROGRAM}_config.h.in"
         "${PROJ_BINARY_DIR}/${TFTPSTATS_PROGRAM}_config.h")
@@ -83,6 +91,10 @@ set(PROJECT_C_FILES src/main.c)
 add_executable(${TFTPSTATS_PROGRAM} ${PROJECT_C_FILES})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPC_PROGRAM})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPS_PROGRAM})
+
+if(ENABLE_BUILD_HARDENING)
+  include(${CMAKE_FILES_DIRECTORY}/tftpstatsCompilerDefenses.cmake)
+endif()
 
 target_compile_options(${TFTPSTATS_PROGRAM} PUBLIC -Wall -Wextra -pedantic)
 target_link_libraries(${TFTPSTATS_PROGRAM} -lpcap)
