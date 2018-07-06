@@ -48,8 +48,8 @@ include(ExternalProject)
 set(LIB_PCAP pcap)
 
 ExternalProject_Add(${LIB_PCAP}
-    DOWNLOAD_COMMAND git clone https://github.com/the-tcpdump-group/libpcap.git ${LIB_PCAP}
-    DOWNLOAD_DIR ${PROJ_SOURCE_DIR}/src/lib/
+    #DOWNLOAD_COMMAND git clone https://github.com/the-tcpdump-group/libpcap.git ${LIB_PCAP}
+    #DOWNLOAD_DIR ${PROJ_SOURCE_DIR}/src/lib/
     SOURCE_DIR   ${PROJ_SOURCE_DIR}/src/lib/${LIB_PCAP}
     BINARY_DIR   ${PROJ_BINARY_DIR}/lib/${LIB_PCAP}
     INSTALL_DIR  ${PROJ_BINARY_DIR}/lib/${LIB_PCAP}
@@ -113,6 +113,8 @@ configure_file(
         "${PROJ_BINARY_DIR}/${TFTPSTATS_PROGRAM}_config.h")
 
 include_directories(${PROJ_BINARY_DIR})
+include_directories(${PROJ_BINARY_DIR}/lib/${LIB_PCAP})
+include_directories(${PROJ_BINARY_DIR}/lib/${LIB_PCAP}/include)
 
 set(PROJECT_C_FILES src/main.c)
 
