@@ -11,20 +11,8 @@
 #endif
 
 // Constants ///////////////////////////////////////////////////////////////////
-#ifndef TARGET_UID
-    #define TARGET_UID 0
-#endif
-
-#ifndef TARGET_GID
-    #define TARGET_GID 0
-#endif
-
-#ifndef MIN_UID
-    #define MIN_UID 500
-#endif
-
-#ifndef MIN_GID
-    #define MIN_GID 500
+#ifndef CAPTURE_BUFFER_SIZE
+    #define CAPTURE_BUFFER_SIZE 65535
 #endif
 
 #endif /* __TFTPS_CONFIG_H */

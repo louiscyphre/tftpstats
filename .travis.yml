@@ -14,7 +14,7 @@ env:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y -qq gcc cmake git ccache build-essential byacc flex
+  - sudo apt-get install -y -qq gcc cmake git ccache build-essential byacc flex tcpdump
 
 before_script:
   - mkdir /home/travis/build/bin

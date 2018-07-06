@@ -48,8 +48,8 @@ include(ExternalProject)
 set(LIB_PCAP pcap)
 
 ExternalProject_Add(${LIB_PCAP}
-    DOWNLOAD_COMMAND git clone https://github.com/the-tcpdump-group/libpcap.git ${LIB_PCAP}
-    DOWNLOAD_DIR ${PROJ_SOURCE_DIR}/src/lib/
+    #DOWNLOAD_COMMAND git clone https://github.com/the-tcpdump-group/libpcap.git ${LIB_PCAP}
+    #DOWNLOAD_DIR ${PROJ_SOURCE_DIR}/src/lib/
     SOURCE_DIR   ${PROJ_SOURCE_DIR}/src/lib/${LIB_PCAP}
     BINARY_DIR   ${PROJ_BINARY_DIR}/lib/${LIB_PCAP}
     INSTALL_DIR  ${PROJ_BINARY_DIR}/lib/${LIB_PCAP}
@@ -116,7 +116,15 @@ include_directories(${PROJ_BINARY_DIR})
 include_directories(${PROJ_BINARY_DIR}/lib/${LIB_PCAP})
 include_directories(${PROJ_BINARY_DIR}/lib/${LIB_PCAP}/include)
 
-set(PROJECT_C_FILES src/main.c)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-DDEBUG)
+    set(DEBUG TRUE)
+    #FIXME if needed extra stack prints
+    set(PROJECT_C_FILES src/main.c)# src/debug/gdb.c)
+else()
+    set(PROJECT_C_FILES src/main.c)
+endif()
+
 
 add_executable(${TFTPSTATS_PROGRAM} ${PROJECT_C_FILES})
 add_dependencies(${TFTPSTATS_PROGRAM} ${LIB_PCAP})

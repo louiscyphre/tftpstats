@@ -4,6 +4,7 @@
 // Created on: 20:12 03.07.2018
 //
 #include "tftpstats_config.h"
+#include "debug_utils.h"
 
 #include <errno.h>
 #include <unistd.h>
@@ -15,42 +16,60 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netinet/if_ether.h>
+
 // Types ///////////////////////////////////////////////////////////////////////
-
-typedef enum {
-    TFTPSTATS_FAILURE = -1, TFTPSTATS_SUCCESS, TFTPSTATS_INVALID_PARAMETER,
-    TFTPSTATS_ERROR_GETADDRINFO, TFTPSTATS_COULD_NOT_CONNECT,
-    TFTPSTATS_ERROR_SENDTO, TFTPSTATS_UNEXPECTED_PACKET,
-    TFTPSTATS_ERROR_RECVFROM, TFTPSTATS_PACKET_SENT_PARTIALLY,
-    TFTPSTATS_ERROR_SELECT, TFTPSTATS_TIMEOUT,
-    TFTPSTATS_ERROR_OPEN, TFTPSTATS_MAX_TIMEOUTS_REACHED,
-    TFTPSTATS_MAX_INVALID_PACKETS_REACHED,
-    TFTPSTATS_FILE_NAME_TOO_LONG, TFTPSTATS_MODE_NAME_TOO_LONG,
-    TFTPSTATS_OUT_OF_MEMORY
-} tftpstats_result_t;
-
+typedef enum { SUCCESS, FAILURE, INVALID_PARAMETER, TIMEOUT,
+    OUT_OF_MEMORY } return_value_t;
 
 void
 callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
 }
 
-int main() {
+int main(int argc,char **argv) {
 
     char error_buffer[PCAP_ERRBUF_SIZE];
-    char *device;
+    pcap_if_t *all_devices = NULL;
+    int result;
 
-    device = pcap_lookupdev(error_buffer);
-    if (device == NULL) {
-        printf("%s\n", error_buffer);
-        exit(1);
+    result = pcap_findalldevs(&all_devices, error_buffer);
+    if (result == -1) {
+        LOG();
+        printf("[ERROR] %s\n", error_buffer);
+        exit(FAILURE);
     }
 
-    pcap_t *pcap_resource;
-    pcap_resource = pcap_open_live(device, PCAP_ERRBUF_SIZE, 0, -1, error_buffer);
+    bpf_u_int32 ip_address, subnet_mask;
+    const char *device = all_devices->name;
+
+    pcap_lookupnet(device, &ip_address, &subnet_mask, error_buffer);
+
+    pcap_t *pcap_resource = pcap_open_live(device, CAPTURE_BUFFER_SIZE,
+                                           0, -1, error_buffer);
+
     if (pcap_resource == NULL) {
-        printf("pcap_open_live(): %s\n", error_buffer);
-        exit(1);
+        LOG();
+        printf("[ERROR] pcap_open_live(): %s\n", error_buffer);
+        exit(FAILURE);
     }
+
+    struct bpf_program filter_program;
+    result = pcap_compile(pcap_resource, &filter_program,
+                          argv[1], 0, ip_address);
+    if (result == -1) {
+        LOG();
+        fprintf(stderr, "[ERROR] Call of pcap_compile() failed\n");
+        exit(FAILURE);
+    }
+
+    if (pcap_setfilter(pcap_resource, &filter_program) == -1) {
+        LOG();
+        fprintf(stderr, "[ERROR] Call of pcap_setfilter() failed\n");
+        exit(FAILURE);
+    }
+
     pcap_loop(pcap_resource, -1, callback, NULL);
-    return 0;
+
+    pcap_freealldevs(all_devices);
+
+    return SUCCESS;
 }
