@@ -46,7 +46,7 @@ int main() {
     }
 
     pcap_t *pcap_resource;
-    pcap_resource = pcap_open_live(device, BUFSIZ, 0, -1, error_buffer);
+    pcap_resource = pcap_open_live(device, PCAP_ERRBUF_SIZE, 0, -1, error_buffer);
     if (pcap_resource == NULL) {
         printf("pcap_open_live(): %s\n", error_buffer);
         exit(1);

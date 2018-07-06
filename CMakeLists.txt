@@ -4,16 +4,19 @@ set(TFTPSTATS_PROGRAM tftpstats)
 
 project(${TFTPSTATS_PROGRAM} C)
 
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY   ON)
 set(CMAKE_COLOR_MAKEFILE   ON)
+
 set(PROJ_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-set(CMAKE_FILES_DIRECTORY ${PROJ_SOURCE_DIR}/cmake)
+set(CMAKE_FILES_DIR ${PROJ_SOURCE_DIR}/cmake)
 set(PROJ_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(PROJ_TMP_DIR    ${CMAKE_INSTALL_PREFIX}/tmp)
 
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_C_STANDARD 11)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-include("${CMAKE_FILES_DIRECTORY}/${TFTPSTATS_PROGRAM}Utils.cmake")
+include("${CMAKE_FILES_DIR}/${TFTPSTATS_PROGRAM}Utils.cmake")
 
 find_package(Byacc REQUIRED)
 find_package(Flex REQUIRED)
@@ -23,7 +26,7 @@ if(NOT DEFINED TFTPSTATS_GCC AND CMAKE_C_COMPILER_ID MATCHES "GNU")
 endif()
 
 option(ENABLE_CCACHE "Use ccache" ON)
-option(ENABLE_BUILD_HARDENING "Enable build hardening" ON)
+option(ENABLE_BUILD_HARDENING "Enable build hardening" OFF)
 
 include(ProcessorCount)
 ProcessorCount(N)
@@ -41,6 +44,31 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 include(ExternalProject)
+
+set(LIB_PCAP pcap)
+
+ExternalProject_Add(${LIB_PCAP}
+    DOWNLOAD_COMMAND git clone https://github.com/the-tcpdump-group/libpcap.git ${LIB_PCAP}
+    DOWNLOAD_DIR ${PROJ_SOURCE_DIR}/src/lib/
+    SOURCE_DIR   ${PROJ_SOURCE_DIR}/src/lib/${LIB_PCAP}
+    BINARY_DIR   ${PROJ_BINARY_DIR}/lib/${LIB_PCAP}
+    INSTALL_DIR  ${PROJ_BINARY_DIR}/lib/${LIB_PCAP}
+    TMP_DIR      ${PROJ_SOURCE_DIR}/tmp
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PROJ_BINARY_DIR}/lib/${LIB_PCAP} -DCMAKE_SOURCE_DIR=${PROJ_SOURCE_DIR}/src/lib/${LIB_PCAP}
+    BUILD_COMMAND make -j ${N}
+    INSTALL_COMMAND make install
+    BUILD_IN_SOURCE 0
+    BUILD_ALWAYS 1
+    DOWNLOAD_NO_PROGRESS 1
+    UPDATE_DISCONNECTED 0
+    LOG_DOWNLOAD 0
+    LOG_CONFIGURE 0
+    LOG_INSTALL 0
+    LOG_BUILD 0
+    LOG_UPDATE 0
+    LOG_TEST 0
+    GIT_PROGRESS 0
+)
 
 set(TFTPC_PROGRAM tftpc)
 
@@ -89,17 +117,18 @@ include_directories(${PROJ_BINARY_DIR})
 set(PROJECT_C_FILES src/main.c)
 
 add_executable(${TFTPSTATS_PROGRAM} ${PROJECT_C_FILES})
+add_dependencies(${TFTPSTATS_PROGRAM} ${LIB_PCAP})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPC_PROGRAM})
 add_dependencies(${TFTPSTATS_PROGRAM} ${TFTPS_PROGRAM})
 
 if(ENABLE_BUILD_HARDENING)
-  include(${CMAKE_FILES_DIRECTORY}/tftpstatsCompilerDefenses.cmake)
+    include("${CMAKE_FILES_DIR}/${TFTPSTATS_PROGRAM}CompilerDefenses.cmake")
 endif()
 
 target_compile_options(${TFTPSTATS_PROGRAM} PUBLIC -Wall -Wextra -pedantic)
-target_link_libraries(${TFTPSTATS_PROGRAM} -lpcap)
+target_link_libraries(${TFTPSTATS_PROGRAM} ${CMAKE_INSTALL_PREFIX}/bin/lib/${LIB_PCAP}/${CMAKE_STATIC_LIBRARY_PREFIX}${LIB_PCAP}${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 add_custom_target(clean-all
    COMMAND ${CMAKE_BUILD_TOOL} clean
-   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_FILES_DIRECTORY}/clean-all.cmake)
+   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_FILES_DIR}/clean-all.cmake)
 
