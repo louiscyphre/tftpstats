@@ -34,7 +34,6 @@ int main(int argc,char **argv) {
     result = pcap_findalldevs(&all_devices, error_buffer);
     if (result == -1) {
         LOG();
-        printf("[ERROR] %s\n", error_buffer);
         exit(FAILURE);
     }
 
@@ -48,7 +47,6 @@ int main(int argc,char **argv) {
 
     if (pcap_resource == NULL) {
         LOG();
-        printf("[ERROR] pcap_open_live(): %s\n", error_buffer);
         exit(FAILURE);
     }
 
@@ -57,13 +55,11 @@ int main(int argc,char **argv) {
                           argv[1], 0, ip_address);
     if (result == -1) {
         LOG();
-        fprintf(stderr, "[ERROR] Call of pcap_compile() failed\n");
         exit(FAILURE);
     }
 
     if (pcap_setfilter(pcap_resource, &filter_program) == -1) {
         LOG();
-        fprintf(stderr, "[ERROR] Call of pcap_setfilter() failed\n");
         exit(FAILURE);
     }
 
